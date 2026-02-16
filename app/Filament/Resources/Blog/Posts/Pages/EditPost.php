@@ -4,12 +4,9 @@ namespace App\Filament\Resources\Blog\Posts\Pages;
 
 use App\Filament\Resources\Blog\Posts\PostResource;
 use App\Models\Blog\Post;
-use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 
 class EditPost extends EditRecord
@@ -28,33 +25,6 @@ class EditPost extends EditRecord
     {
         return [
             ViewAction::make(),
-            Action::make('quick_publish')
-                ->icon(Heroicon::RocketLaunch)
-                ->color('success')
-                ->keyBindings(['mod+shift+p'])
-                ->visible(fn (Post $record): bool => ! $record->published_at?->isPast())
-                ->action(function (Post $record): void {
-                    $record->update(['published_at' => now()]);
-                    $this->refreshFormData(['published_at']);
-
-                    Notification::make()
-                        ->title('Post published')
-                        ->success()
-                        ->send();
-                }),
-            Action::make('unpublish')
-                ->icon(Heroicon::XCircle)
-                ->color('warning')
-                ->visible(fn (Post $record): bool => (bool) $record->published_at?->isPast())
-                ->action(function (Post $record): void {
-                    $record->update(['published_at' => null]);
-                    $this->refreshFormData(['published_at']);
-
-                    Notification::make()
-                        ->title('Post unpublished')
-                        ->warning()
-                        ->send();
-                }),
             DeleteAction::make(),
         ];
     }

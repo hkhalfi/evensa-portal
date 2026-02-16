@@ -140,7 +140,7 @@ class FeaturesOverviewWidget extends Widget
             'color' => 'rose',
             'features' => array_values(array_filter([
                 $order ? ['name' => 'Replicate action', 'description' => 'Click "Replicate" in the edit page header', 'url' => OrderResource::getUrl('edit', ['record' => $order]), 'resource' => 'Orders'] : null,
-                $post ? ['name' => 'Keyboard shortcuts', 'description' => 'Press Cmd+Shift+P on the edit page to quick-publish (only on unpublished posts)', 'url' => PostResource::getUrl('edit', ['record' => $post]), 'resource' => 'Posts'] : null,
+                $post ? ['name' => 'Keyboard shortcuts', 'description' => 'Press Cmd+Shift+P on the view page to quick-publish (only on unpublished posts)', 'url' => PostResource::getUrl('view', ['record' => $post]), 'resource' => 'Posts'] : null,
                 ['name' => 'Export action', 'description' => 'Click "Export" in the page header', 'url' => AuthorResource::getUrl('index'), 'resource' => 'Authors'],
                 ['name' => 'Import action', 'description' => 'Click "Import" in the page header', 'url' => BlogCategoryResource::getUrl('index'), 'resource' => 'Blog Categories'],
                 ['name' => 'Badge on action', 'description' => 'Dynamic count badge on action buttons — see "Leave Requests" in the page header', 'url' => EmployeeResource::getUrl('index'), 'resource' => 'Employees'],

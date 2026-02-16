@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Validation\ValidationException;
 
 class ViewExpense extends ViewRecord
 {
@@ -20,6 +21,35 @@ class ViewExpense extends ViewRecord
     protected function getActions(): array
     {
         return [
+            Action::make('submit')
+                ->icon(Heroicon::PaperAirplane)
+                ->color('info')
+                ->visible(fn (Expense $record): bool => $record->status === ExpenseStatus::Draft)
+                ->requiresConfirmation()
+                ->before(function (Expense $record): void {
+                    if ($record->total_amount <= 0) {
+                        Notification::make()
+                            ->title('Cannot submit an expense with no amount')
+                            ->danger()
+                            ->send();
+
+                        throw ValidationException::withMessages([]);
+                    }
+                })
+                ->action(function (Expense $record): void {
+                    $record->update([
+                        'status' => ExpenseStatus::Submitted,
+                        'submitted_at' => now(),
+                    ]);
+
+                    $this->refreshFormData(['status']);
+                })
+                ->after(function (Expense $record): void {
+                    Notification::make()
+                        ->title("Expense {$record->expense_number} submitted for approval")
+                        ->success()
+                        ->send();
+                }),
             Action::make('approve')
                 ->icon(Heroicon::Check)
                 ->color('success')
@@ -73,6 +103,29 @@ class ViewExpense extends ViewRecord
                     Notification::make()
                         ->title('Expense reimbursed')
                         ->success()
+                        ->send();
+
+                    $this->refreshFormData(['status']);
+                }),
+            Action::make('flag')
+                ->icon(Heroicon::Flag)
+                ->color('warning')
+                ->modalWidth(Width::Medium)
+                ->modalSubmitActionLabel('Flag')
+                ->schema([
+                    Textarea::make('flag_reason')
+                        ->required()
+                        ->label('Reason for flagging'),
+                ])
+                ->action(function (Expense $record, array $data): void {
+                    $record->update([
+                        'status' => ExpenseStatus::Draft,
+                        'notes' => $data['flag_reason'],
+                    ]);
+
+                    Notification::make()
+                        ->title('Expense flagged and returned to draft')
+                        ->warning()
                         ->send();
 
                     $this->refreshFormData(['status']);
