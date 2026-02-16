@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -68,7 +69,8 @@ class PaymentsRelationManager extends RelationManager
                 ColumnGroup::make('Details')
                     ->columns([
                         TextColumn::make('reference')
-                            ->searchable(),
+                            ->searchable()
+                            ->weight(FontWeight::Medium),
 
                         TextColumn::make('amount')
                             ->sortable()

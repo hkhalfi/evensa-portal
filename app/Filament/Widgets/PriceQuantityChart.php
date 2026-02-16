@@ -8,7 +8,7 @@ class PriceQuantityChart extends ChartWidget
 {
     protected ?string $heading = 'Price vs. quantity';
 
-    protected static ?int $sort = 9;
+    protected static ?int $sort = 7;
 
     protected function getType(): string
     {

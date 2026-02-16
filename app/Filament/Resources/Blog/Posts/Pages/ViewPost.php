@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Blog\Posts\Pages;
 
 use App\Filament\Resources\Blog\Posts\PostResource;
 use App\Models\Blog\Post;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -21,6 +22,8 @@ class ViewPost extends ViewRecord
 
     protected function getActions(): array
     {
-        return [];
+        return [
+            EditAction::make(),
+        ];
     }
 }

@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -80,7 +81,8 @@ class PaymentsRelationManager extends RelationManager
                 TextColumn::make('order.number')
                     ->url(fn ($record) => OrderResource::getUrl('edit', [$record->order]))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight(FontWeight::Medium),
 
                 ColumnGroup::make('Details')
                     ->columns([

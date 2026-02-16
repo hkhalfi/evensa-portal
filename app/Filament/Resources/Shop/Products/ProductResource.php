@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Shop\Products;
 
-use App\Filament\Clusters\Products\ProductsCluster;
 use App\Filament\Resources\Shop\Products\Pages\CreateProduct;
 use App\Filament\Resources\Shop\Products\Pages\EditProduct;
 use App\Filament\Resources\Shop\Products\Pages\ListProducts;
@@ -14,25 +13,25 @@ use App\Models\Shop\Product;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $cluster = ProductsCluster::class;
-
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-bolt';
+    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBolt;
 
-    protected static ?string $navigationLabel = 'Products';
+    protected static string | UnitEnum | null $navigationGroup = 'Shop';
 
     protected static ?int $navigationSort = 0;
 
-    protected static ?string $slug = 'products';
+    protected static ?string $slug = 'shop/products';
 
     public static function form(Schema $schema): Schema
     {

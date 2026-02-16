@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use Carbon\Carbon;
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -53,17 +54,17 @@ class StatsOverviewWidget extends BaseWidget
         return [
             Stat::make('Revenue', '$' . $formatNumber($revenue))
                 ->description('32k increase')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->descriptionIcon(Heroicon::ArrowTrendingUp)
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->color('success'),
             Stat::make('New customers', $formatNumber($newCustomers))
                 ->description('3% decrease')
-                ->descriptionIcon('heroicon-m-arrow-trending-down')
+                ->descriptionIcon(Heroicon::ArrowTrendingDown)
                 ->chart([17, 16, 14, 15, 14, 13, 12])
                 ->color('danger'),
             Stat::make('New orders', $formatNumber($newOrders))
                 ->description('7% increase')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->descriptionIcon(Heroicon::ArrowTrendingUp)
                 ->chart([15, 4, 10, 2, 12, 4, 12])
                 ->color('success'),
         ];

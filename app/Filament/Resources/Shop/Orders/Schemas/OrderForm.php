@@ -20,6 +20,8 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Squire\Models\Currency;
 
 class OrderForm
@@ -102,7 +104,7 @@ class OrderForm
                     return $action
                         ->modalHeading('Create customer')
                         ->modalSubmitActionLabel('Create customer')
-                        ->modalWidth('lg');
+                        ->modalWidth(Width::Large);
                 }),
 
             ToggleButtons::make('status')
@@ -161,7 +163,7 @@ class OrderForm
             ->extraItemActions([
                 Action::make('openProduct')
                     ->tooltip('Open product')
-                    ->icon('heroicon-m-arrow-top-right-on-square')
+                    ->icon(Heroicon::ArrowTopRightOnSquare)
                     ->url(function (array $arguments, Repeater $component): ?string {
                         $itemData = $component->getRawItemState($arguments['item']);
 

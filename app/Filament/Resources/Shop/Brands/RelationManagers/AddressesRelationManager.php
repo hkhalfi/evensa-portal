@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Squire\Models\Country;
@@ -46,7 +47,8 @@ class AddressesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('street'),
+                TextColumn::make('street')
+                    ->weight(FontWeight::Medium),
 
                 TextColumn::make('zip'),
 

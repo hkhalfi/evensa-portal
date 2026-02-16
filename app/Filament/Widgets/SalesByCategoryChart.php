@@ -8,7 +8,7 @@ class SalesByCategoryChart extends ChartWidget
 {
     protected ?string $heading = 'Sales by category';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected function getType(): string
     {

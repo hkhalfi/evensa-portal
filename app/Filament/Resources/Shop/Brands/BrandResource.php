@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Shop\Brands;
 
-use App\Filament\Clusters\Products\ProductsCluster;
 use App\Filament\Resources\Shop\Brands\Pages\CreateBrand;
 use App\Filament\Resources\Shop\Brands\Pages\EditBrand;
 use App\Filament\Resources\Shop\Brands\Pages\ListBrands;
@@ -14,23 +13,23 @@ use App\Models\Shop\Brand;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
 
-    protected static ?string $cluster = ProductsCluster::class;
-
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-bookmark-square';
+    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBookmarkSquare;
 
-    protected static ?string $navigationParentItem = 'Products';
+    protected static string | UnitEnum | null $navigationGroup = 'Shop';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
-    protected static ?string $slug = 'brands';
+    protected static ?string $slug = 'shop/brands';
 
     public static function form(Schema $schema): Schema
     {

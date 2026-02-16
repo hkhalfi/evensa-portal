@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\Shop\Orders\OrderResource;
 use App\Models\Shop\Order;
 use Filament\Actions\Action;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -14,7 +15,7 @@ class LatestOrders extends BaseWidget
 {
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     public function table(Table $table): Table
     {
@@ -26,7 +27,8 @@ class LatestOrders extends BaseWidget
                 TextColumn::make('created_at')
                     ->label('Order date')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight(FontWeight::Medium),
                 TextColumn::make('number')
                     ->searchable()
                     ->sortable(),
