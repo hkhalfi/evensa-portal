@@ -64,6 +64,8 @@ class DepartmentsTable
                             TextInput::make('budget')
                                 ->numeric()
                                 ->prefix('$')
+                                ->minValue(0)
+                                ->maxValue(9999999999.99)
                                 ->required(),
                         ])
                         ->action(fn (Department $record, array $data) => $record->update($data)),

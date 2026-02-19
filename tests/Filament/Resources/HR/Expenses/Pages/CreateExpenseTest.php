@@ -115,6 +115,40 @@ it('sets status to Draft on create', function () {
     $undoRepeaterFake();
 });
 
+it('validates expense line numeric fields', function (array $lineData, array $errors) {
+    $undoRepeaterFake = Repeater::fake();
+
+    $employee = Employee::factory()->create();
+
+    Livewire::test(CreateExpense::class)
+        ->fillForm([
+            'employee_id' => $employee->id,
+            'category' => ExpenseCategory::Travel,
+            'description' => 'Business trip',
+            'expenseLines' => [
+                [
+                    'description' => 'Item',
+                    'quantity' => 1,
+                    'unit_price' => 50.00,
+                    'date' => now()->format('Y-m-d'),
+                    ...$lineData,
+                ],
+            ],
+            'currency' => 'USD',
+        ])
+        ->goToWizardStep(2)
+        ->goToWizardStep(3)
+        ->call('create')
+        ->assertHasFormErrors($errors);
+
+    $undoRepeaterFake();
+})->with([
+    '`quantity` must be at least 1' => [['quantity' => 0], ['expenseLines.0.quantity' => 'min']],
+    '`quantity` must not be negative' => [['quantity' => -1], ['expenseLines.0.quantity' => 'min']],
+    '`unit_price` must not be negative' => [['unit_price' => -1], ['expenseLines.0.unit_price' => 'min']],
+    '`unit_price` must not exceed 99999999.99' => [['unit_price' => 100000000], ['expenseLines.0.unit_price' => 'max']],
+]);
+
 it('validates the form data', function (array $data, array $errors) {
     $employee = Employee::factory()->create();
 

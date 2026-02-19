@@ -138,11 +138,15 @@ class ProjectForm
                                 TextInput::make('budget')
                                     ->numeric()
                                     ->prefix('$')
+                                    ->minValue(0)
+                                    ->maxValue(9999999999.99)
                                     ->default(0),
 
                                 TextInput::make('spent')
                                     ->numeric()
                                     ->prefix('$')
+                                    ->minValue(0)
+                                    ->maxValue(9999999999.99)
                                     ->disabled()
                                     ->dehydrated()
                                     ->required()
@@ -151,12 +155,16 @@ class ProjectForm
                                 TextInput::make('estimated_hours')
                                     ->numeric()
                                     ->suffix('hours')
+                                    ->minValue(0)
+                                    ->maxValue(9999999.9)
                                     ->required()
                                     ->default(0),
 
                                 TextInput::make('actual_hours')
                                     ->numeric()
                                     ->suffix('hours')
+                                    ->minValue(0)
+                                    ->maxValue(9999999.9)
                                     ->disabled()
                                     ->dehydrated()
                                     ->required()

@@ -34,6 +34,8 @@ class PaymentsRelationManager extends RelationManager
 
                 TextInput::make('amount')
                     ->numeric()
+                    ->minValue(0)
+                    ->maxValue(99999999.99)
                     ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
                     ->required(),
 

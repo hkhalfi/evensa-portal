@@ -95,6 +95,8 @@ class EmployeeForm
                                 TextInput::make('salary')
                                     ->numeric()
                                     ->prefix('$')
+                                    ->minValue(0)
+                                    ->maxValue(99999999.99)
                                     ->visible(fn (Get $get): bool => in_array($get('employment_type'), [
                                         EmploymentType::FullTime,
                                         EmploymentType::PartTime,
@@ -105,6 +107,8 @@ class EmployeeForm
                                 TextInput::make('hourly_rate')
                                     ->numeric()
                                     ->prefix('$')
+                                    ->minValue(0)
+                                    ->maxValue(999999.99)
                                     ->visible(fn (Get $get): bool => in_array($get('employment_type'), [
                                         EmploymentType::Contractor,
                                         EmploymentType::Intern,

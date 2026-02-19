@@ -65,6 +65,8 @@ class LeaveRequestForm
                         TextInput::make('days_requested')
                             ->numeric()
                             ->step(0.5)
+                            ->minValue(0)
+                            ->maxValue(999.9)
                             ->disabled()
                             ->dehydrated()
                             ->required(),

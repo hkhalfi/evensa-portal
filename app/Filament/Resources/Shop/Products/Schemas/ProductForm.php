@@ -67,12 +67,16 @@ class ProductForm
                             ->schema([
                                 TextInput::make('price')
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999.99)
                                     ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
                                     ->required(),
 
                                 TextInput::make('old_price')
                                     ->label('Compare at price')
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999.99)
                                     ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
                                     ->required(),
 
@@ -80,6 +84,8 @@ class ProductForm
                                     ->label('Cost per item')
                                     ->helperText('Customers won\'t see this price.')
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(99999999.99)
                                     ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
                                     ->required(),
                             ])
@@ -101,13 +107,17 @@ class ProductForm
                                 TextInput::make('qty')
                                     ->label('Quantity')
                                     ->numeric()
-                                    ->rules(['integer', 'min:0'])
+                                    ->minValue(0)
+                                    ->maxValue(18446744073709551615)
+                                    ->integer()
                                     ->required(),
 
                                 TextInput::make('security_stock')
                                     ->helperText('The safety stock is the limit stock for your products which alerts you if the product stock will soon be out of stock.')
                                     ->numeric()
-                                    ->rules(['integer', 'min:0'])
+                                    ->minValue(0)
+                                    ->maxValue(18446744073709551615)
+                                    ->integer()
                                     ->required(),
                             ])
                             ->columns(2),

@@ -53,10 +53,14 @@ class DepartmentForm
                 TextInput::make('budget')
                     ->numeric()
                     ->prefix('$')
+                    ->minValue(0)
+                    ->maxValue(9999999999.99)
                     ->default(0),
 
                 TextInput::make('headcount_limit')
                     ->integer()
+                    ->minValue(0)
+                    ->maxValue(2147483647)
                     ->default(0),
 
                 ColorPicker::make('color'),

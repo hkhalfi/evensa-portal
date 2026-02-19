@@ -89,6 +89,8 @@ class ExpenseForm
 
                                 TextInput::make('quantity')
                                     ->integer()
+                                    ->minValue(1)
+                                    ->maxValue(2147483647)
                                     ->default(1)
                                     ->required()
                                     ->live(onBlur: true)
@@ -101,6 +103,8 @@ class ExpenseForm
                                 TextInput::make('unit_price')
                                     ->numeric()
                                     ->prefix('$')
+                                    ->minValue(0)
+                                    ->maxValue(99999999.99)
                                     ->required()
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function (Get $get, Set $set): void {
@@ -112,6 +116,8 @@ class ExpenseForm
                                 TextInput::make('amount')
                                     ->numeric()
                                     ->prefix('$')
+                                    ->minValue(0)
+                                    ->maxValue(99999999.99)
                                     ->disabled()
                                     ->dehydrated(),
 
@@ -129,6 +135,8 @@ class ExpenseForm
                         TextInput::make('total_amount')
                             ->numeric()
                             ->prefix('$')
+                            ->minValue(0)
+                            ->maxValue(99999999.99)
                             ->disabled()
                             ->dehydrated(),
 

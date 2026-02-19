@@ -59,6 +59,10 @@ it('validates create action data', function (array $data, array $errors) {
     '`name` is required' => [['name' => null], ['name' => 'required']],
     '`name` is max 255 characters' => [['name' => Str::random(256)], ['name' => 'max']],
     '`description` is max 65535 characters' => [['description' => Str::random(65536)], ['description' => 'max']],
+    '`budget` must not exceed 9999999999.99' => [['budget' => 10000000000], ['budget' => 'max']],
+    '`budget` must not be negative' => [['budget' => -1], ['budget' => 'min']],
+    '`headcount_limit` must not exceed 2147483647' => [['headcount_limit' => 2147483648], ['headcount_limit' => 'max']],
+    '`headcount_limit` must not be negative' => [['headcount_limit' => -1], ['headcount_limit' => 'min']],
 ]);
 
 it('validates edit action data', function (array $data, array $errors) {
@@ -76,6 +80,10 @@ it('validates edit action data', function (array $data, array $errors) {
     '`name` is required' => [['name' => null], ['name' => 'required']],
     '`name` is max 255 characters' => [['name' => Str::random(256)], ['name' => 'max']],
     '`description` is max 65535 characters' => [['description' => Str::random(65536)], ['description' => 'max']],
+    '`budget` must not exceed 9999999999.99' => [['budget' => 10000000000], ['budget' => 'max']],
+    '`budget` must not be negative' => [['budget' => -1], ['budget' => 'min']],
+    '`headcount_limit` must not exceed 2147483647' => [['headcount_limit' => 2147483648], ['headcount_limit' => 'max']],
+    '`headcount_limit` must not be negative' => [['headcount_limit' => -1], ['headcount_limit' => 'min']],
 ]);
 
 it('can adjust department budget', function () {

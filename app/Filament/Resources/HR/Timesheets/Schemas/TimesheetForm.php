@@ -60,6 +60,8 @@ class TimesheetForm
                         TextInput::make('hours')
                             ->numeric()
                             ->step(0.5)
+                            ->minValue(0)
+                            ->maxValue(999.9)
                             ->suffix('hours')
                             ->required()
                             ->live(onBlur: true)
@@ -69,6 +71,8 @@ class TimesheetForm
 
                         TextInput::make('minutes')
                             ->integer()
+                            ->minValue(0)
+                            ->maxValue(59)
                             ->mask('99')
                             ->suffix('min')
                             ->default(0),
@@ -81,6 +85,8 @@ class TimesheetForm
                         TextInput::make('hourly_rate')
                             ->numeric()
                             ->prefix('$')
+                            ->minValue(0)
+                            ->maxValue(999999.99)
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (Get $get, Set $set): void {
                                 static::calculateTotalCost($get, $set);
@@ -89,6 +95,8 @@ class TimesheetForm
                         TextInput::make('total_cost')
                             ->numeric()
                             ->prefix('$')
+                            ->minValue(0)
+                            ->maxValue(99999999.99)
                             ->disabled()
                             ->dehydrated(),
 

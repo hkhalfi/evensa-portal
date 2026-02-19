@@ -58,6 +58,8 @@ class TaskForm
                         TextInput::make('estimated_hours')
                             ->numeric()
                             ->step(0.5)
+                            ->minValue(0)
+                            ->maxValue(99999.9)
                             ->suffix('hours'),
 
                         DatePicker::make('due_date'),

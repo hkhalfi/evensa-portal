@@ -150,7 +150,9 @@ class OrderForm
 
                 TextInput::make('qty')
                     ->label('Quantity')
-                    ->numeric()
+                    ->integer()
+                    ->minValue(1)
+                    ->maxValue(2147483647)
                     ->default(1)
                     ->required(),
 
@@ -158,6 +160,8 @@ class OrderForm
                     ->disabled()
                     ->dehydrated()
                     ->numeric()
+                    ->minValue(0)
+                    ->maxValue(99999999.99)
                     ->required(),
             ])
             ->extraItemActions([

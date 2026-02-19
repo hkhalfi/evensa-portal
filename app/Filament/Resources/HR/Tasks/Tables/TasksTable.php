@@ -113,6 +113,8 @@ class TasksTable
                             TextInput::make('actual_hours')
                                 ->numeric()
                                 ->step(0.5)
+                                ->minValue(0)
+                                ->maxValue(99999.9)
                                 ->suffix('hours'),
                         ])
                         ->action(function (Task $record, array $data): void {

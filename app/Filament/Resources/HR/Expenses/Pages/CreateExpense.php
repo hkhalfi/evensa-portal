@@ -93,6 +93,8 @@ class CreateExpense extends CreateRecord
 
                             TextInput::make('quantity')
                                 ->integer()
+                                ->minValue(1)
+                                ->maxValue(2147483647)
                                 ->default(1)
                                 ->required()
                                 ->live(onBlur: true)
@@ -105,6 +107,8 @@ class CreateExpense extends CreateRecord
                             TextInput::make('unit_price')
                                 ->numeric()
                                 ->prefix('$')
+                                ->minValue(0)
+                                ->maxValue(99999999.99)
                                 ->required()
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (Get $get, Set $set): void {
@@ -116,6 +120,8 @@ class CreateExpense extends CreateRecord
                             TextInput::make('amount')
                                 ->numeric()
                                 ->prefix('$')
+                                ->minValue(0)
+                                ->maxValue(99999999.99)
                                 ->disabled()
                                 ->dehydrated(),
 
@@ -132,6 +138,8 @@ class CreateExpense extends CreateRecord
                     TextInput::make('total_amount')
                         ->numeric()
                         ->prefix('$')
+                        ->minValue(0)
+                        ->maxValue(99999999.99)
                         ->disabled()
                         ->dehydrated(),
 

@@ -137,11 +137,15 @@ class ProductsTable
                             TextInput::make('price')
                                 ->numeric()
                                 ->prefix('$')
+                                ->minValue(0)
+                                ->maxValue(99999999.99)
                                 ->required(),
                             TextInput::make('old_price')
                                 ->label('Compare at price')
                                 ->numeric()
-                                ->prefix('$'),
+                                ->prefix('$')
+                                ->minValue(0)
+                                ->maxValue(99999999.99),
                         ])
                         ->action(fn (Product $record, array $data) => $record->update($data)),
                     Action::make('adjust_stock')
