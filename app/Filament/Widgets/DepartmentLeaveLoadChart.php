@@ -37,6 +37,7 @@ class DepartmentLeaveLoadChart extends ChartWidget
                     'label' => 'Leave Days',
                     'data' => $byDepartment->values()->all(),
                     'backgroundColor' => '#8b5cf6',
+                    'borderColor' => '#8b5cf6',
                 ],
             ],
             'labels' => $byDepartment->keys()->all(),

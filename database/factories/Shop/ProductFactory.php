@@ -58,17 +58,33 @@ class ProductFactory extends Factory
 
     public function definition(): array
     {
+        $oldPrice = $this->faker->randomFloat(2, 10, 500);
+        $price = round($oldPrice * $this->faker->randomFloat(2, 0.7, 1.0), 2);
+
+        // Target margin 20-70%, with cost derived from it
+        $margin = $this->faker->randomFloat(1, 20, 70);
+        $cost = round($price * (1 - $margin / 100), 2);
+
+        // Stock inversely correlated with margin: high margin → low stock, low margin → high stock
+        // margin 20% → ~90 qty, margin 70% → ~15 qty
+        $baseQty = (int) round(120 - ($margin * 1.5));
+        $isAnomaly = $this->faker->boolean(12);
+        $qty = $isAnomaly
+            ? ($margin > 45
+                ? $this->faker->numberBetween(150, 350)  // high margin + huge stock (viral bestseller)
+                : $this->faker->numberBetween(1, 5))     // low margin + nearly gone (clearance dud)
+            : max(1, $baseQty + $this->faker->numberBetween(-15, 15));
+
         return [
             'name' => $name = $this->generateUniqueName(),
             'slug' => Str::slug($name),
             'sku' => $this->faker->unique()->ean8(),
             'barcode' => $this->faker->ean13(),
             'description' => $this->faker->realText(),
-            'old_price' => $price = $this->faker->randomFloat(2, 5, 500),
-            'price' => round($price * $this->faker->randomFloat(2, 0.7, 1.0), 2),
-            'cost' => round($price * $this->faker->randomFloat(2, 0.3, 0.6), 2),
-            // Inverse correlation: cheap products have more stock, expensive ones less
-            'qty' => max(1, (int) round((500 - $price) / 5 + $this->faker->numberBetween(-10, 10))),
+            'old_price' => $oldPrice,
+            'price' => $price,
+            'cost' => $cost,
+            'qty' => $qty,
             'security_stock' => $this->faker->randomDigitNotNull(),
             'featured' => $this->faker->boolean(),
             'is_visible' => $this->faker->boolean(),
