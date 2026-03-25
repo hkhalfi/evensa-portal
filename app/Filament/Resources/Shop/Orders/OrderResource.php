@@ -103,4 +103,9 @@ class OrderResource extends Resource
 
         return (string) $modelClass::where('status', 'new')->count();
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

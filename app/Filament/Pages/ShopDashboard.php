@@ -72,4 +72,9 @@ class ShopDashboard extends BaseDashboard
             ProductMarginAnalysisChart::class,
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

@@ -63,4 +63,9 @@ class LeaveRequestResource extends Resource
 
         return (string) $modelClass::where('status', LeaveStatus::Pending)->count();
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

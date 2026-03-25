@@ -93,4 +93,9 @@ class ProductResource extends Resource
 
         return (string) $modelClass::whereColumn('qty', '<', 'security_stock')->count();
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

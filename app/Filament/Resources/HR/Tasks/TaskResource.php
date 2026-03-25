@@ -57,4 +57,9 @@ class TaskResource extends Resource
 
         return (string) $modelClass::where('status', TaskStatus::InProgress)->count();
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

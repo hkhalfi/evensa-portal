@@ -53,4 +53,9 @@ class TimesheetResource extends Resource
             'edit' => EditTimesheet::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

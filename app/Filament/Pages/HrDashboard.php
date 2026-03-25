@@ -31,4 +31,9 @@ class HrDashboard extends BaseDashboard
             BudgetBurnRateChart::class,
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

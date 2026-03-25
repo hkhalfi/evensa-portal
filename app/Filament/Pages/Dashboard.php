@@ -2,25 +2,25 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\FeaturesOverview;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 
 class Dashboard extends BaseDashboard
 {
     protected static ?int $navigationSort = -2;
 
-    protected static ?string $title = 'Welcome';
+    protected static ?string $navigationLabel = 'Tableau de bord';
 
-    protected ?string $heading = 'Welcome to the Filament Demo!';
+    protected static ?string $title = 'EvEnsa';
+
+    protected ?string $heading = 'EvEnsa';
+
+    protected ?string $subheading = 'Portail de gestion des événements ENSA';
 
     public function getWidgets(): array
     {
         return [
             AccountWidget::class,
-            FilamentInfoWidget::class,
-            FeaturesOverview::class,
         ];
     }
 }

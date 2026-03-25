@@ -73,4 +73,9 @@ class ExpenseResource extends Resource
 
         return (string) $modelClass::where('status', ExpenseStatus::Submitted)->count();
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

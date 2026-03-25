@@ -97,4 +97,9 @@ class EmployeeResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

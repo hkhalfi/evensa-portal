@@ -51,4 +51,9 @@ class DepartmentResource extends Resource
             'index' => ManageDepartments::route('/'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }
