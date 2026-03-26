@@ -11,6 +11,7 @@ use App\Models\EvEnsa\Referentials\Instance;
 use App\Models\EvEnsa\Referentials\Venue;
 use App\Models\EvEnsa\Requests\EventRequest;
 use BackedEnum;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -19,6 +20,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
@@ -175,7 +178,14 @@ class EventRequestResource extends Resource
 
                 TextColumn::make('event_mode')
                     ->label('Mode')
-                    ->badge(),
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'internal' => 'Interne',
+                        'external' => 'Externe',
+                        'online' => 'En ligne',
+                        'hybrid' => 'Hybride',
+                        default => $state,
+                    }),
 
                 TextColumn::make('start_at')
                     ->label('Début')
@@ -191,6 +201,24 @@ class EventRequestResource extends Resource
                 TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft' => 'Brouillon',
+                        'submitted' => 'Soumise',
+                        'under_review' => 'En cours d’examen',
+                        'needs_revision' => 'Révision demandée',
+                        'approved' => 'Approuvée',
+                        'rejected' => 'Rejetée',
+                        default => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'submitted' => 'info',
+                        'under_review' => 'warning',
+                        'needs_revision' => 'warning',
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    })
                     ->sortable(),
 
                 TextColumn::make('venue.name')
@@ -202,6 +230,57 @@ class EventRequestResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Statut')
+                    ->options([
+                        'draft' => 'Brouillon',
+                        'submitted' => 'Soumise',
+                        'under_review' => 'En cours d’examen',
+                        'needs_revision' => 'Révision demandée',
+                        'approved' => 'Approuvée',
+                        'rejected' => 'Rejetée',
+                    ]),
+
+                SelectFilter::make('event_mode')
+                    ->label('Mode')
+                    ->options([
+                        'internal' => 'Interne',
+                        'external' => 'Externe',
+                        'online' => 'En ligne',
+                        'hybrid' => 'Hybride',
+                    ]),
+
+                SelectFilter::make('instance_id')
+                    ->label('Instance')
+                    ->relationship('instance', 'name'),
+
+                SelectFilter::make('event_type_id')
+                    ->label('Type d’événement')
+                    ->relationship('eventType', 'name'),
+
+                SelectFilter::make('category_id')
+                    ->label('Catégorie')
+                    ->relationship('category', 'name'),
+
+                Filter::make('start_at')
+                    ->label('Période')
+                    ->form([
+                        DatePicker::make('start_from')->label('Début à partir du'),
+                        DatePicker::make('start_until')->label('Début jusqu’au'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['start_from'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('start_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['start_until'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('start_at', '<=', $date),
+                            );
+                    }),
             ])
             ->defaultSort('created_at', 'desc');
     }
