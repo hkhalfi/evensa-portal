@@ -8,6 +8,7 @@ use App\Models\EvEnsa\Referentials\Instance;
 use App\Models\EvEnsa\Referentials\Venue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EventRequest extends Model
 {
@@ -24,6 +25,7 @@ class EventRequest extends Model
         'end_at',
         'expected_attendees',
         'description',
+        'organization_request_file',
         'status',
         'submitted_at',
         'review_notes',
@@ -54,5 +56,10 @@ class EventRequest extends Model
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(EventRequestDocument::class);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EvEnsa\Requests\EventRequests;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages\CreateEventRequest;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages\EditEventRequest;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages\ListEventRequests;
+use App\Filament\Resources\EvEnsa\Requests\EventRequests\RelationManagers\DocumentsRelationManager;
 use App\Models\EvEnsa\Referentials\Category;
 use App\Models\EvEnsa\Referentials\EventType;
 use App\Models\EvEnsa\Referentials\Instance;
@@ -13,6 +14,7 @@ use App\Models\EvEnsa\Requests\EventRequest;
 use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -142,6 +144,16 @@ class EventRequestResource extends Resource
                 ->required()
                 ->columnSpanFull(),
 
+            FileUpload::make('organization_request_file')
+                ->label('Demande d’organisation')
+                ->required()
+                ->directory('event-requests/organization-requests')
+                ->disk('public')
+                ->downloadable()
+                ->openable()
+                ->helperText('Joindre la demande officielle d’organisation de l’événement.')
+                ->columnSpanFull(),
+
             Textarea::make('review_notes')
                 ->label('Notes de revue')
                 ->rows(4)
@@ -197,6 +209,12 @@ class EventRequestResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('organization_request_file')
+                    ->label('Demande')
+                    ->formatStateUsing(fn (?string $state): string => filled($state) ? 'Attachée' : 'Absente')
+                    ->badge()
+                    ->color(fn (?string $state): string => filled($state) ? 'success' : 'danger'),
 
                 TextColumn::make('status')
                     ->label('Statut')
@@ -291,6 +309,13 @@ class EventRequestResource extends Resource
             'index' => ListEventRequests::route('/'),
             'create' => CreateEventRequest::route('/create'),
             'edit' => EditEventRequest::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            DocumentsRelationManager::class,
         ];
     }
 }
