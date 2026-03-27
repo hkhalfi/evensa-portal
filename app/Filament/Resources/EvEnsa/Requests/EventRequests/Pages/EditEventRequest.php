@@ -250,6 +250,13 @@ class EditEventRequest extends EditRecord
 
                     $this->redirect(EventResource::getUrl('edit', ['record' => $event]));
                 }),
+            Action::make('view_event')
+                ->label('Voir l’événement')
+                ->icon('heroicon-o-arrow-top-right-on-square')
+                ->color('gray')
+                ->visible(fn (): bool => $this->record->event !== null)
+                ->url(fn (): string => EventResource::getUrl('edit', ['record' => $this->record->event]))
+                ->openUrlInNewTab(false),
 
             DeleteAction::make(),
         ];

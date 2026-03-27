@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EvEnsa\Events\Events\Pages;
 
 use App\Filament\Resources\EvEnsa\Events\Events\EventResource;
+use App\Filament\Resources\EvEnsa\Requests\EventRequests\EventRequestResource;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -146,6 +147,13 @@ class EditEvent extends EditRecord
                         ->success()
                         ->send();
                 }),
+            Action::make('view_request')
+                ->label('Voir la demande')
+                ->icon('heroicon-o-arrow-top-right-on-square')
+                ->color('gray')
+                ->visible(fn (): bool => $this->record->eventRequest !== null)
+                ->url(fn (): string => EventRequestResource::getUrl('edit', ['record' => $this->record->eventRequest]))
+                ->openUrlInNewTab(false),
 
             DeleteAction::make(),
         ];

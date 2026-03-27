@@ -13,6 +13,7 @@ use App\Models\EvEnsa\Referentials\Venue;
 use BackedEnum;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -53,6 +54,11 @@ class EventResource extends Resource
                 ->label('Intitulé')
                 ->required()
                 ->maxLength(255),
+
+            Placeholder::make('source_request')
+                ->label('Demande source')
+                ->content(fn ($record) => $record?->eventRequest?->id ? 'Demande #' . $record->eventRequest->id : 'Aucune demande source')
+                ->columnSpanFull(),
 
             Select::make('instance_id')
                 ->label('Instance organisatrice')
@@ -204,7 +210,9 @@ class EventResource extends Resource
 
                 TextColumn::make('eventRequest.id')
                     ->label('Demande source')
-                    ->prefix('#')
+                    ->formatStateUsing(fn ($state) => filled($state) ? '#' . $state : '—')
+                    ->badge()
+                    ->color(fn ($state) => filled($state) ? 'info' : 'gray')
                     ->toggleable(),
 
                 TextColumn::make('created_at')
