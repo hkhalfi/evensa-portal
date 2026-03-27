@@ -1,20 +1,21 @@
 <?php
 
-namespace App\Models\EvEnsa\Requests;
+namespace App\Models\EvEnsa\Events;
 
 use App\Models\EvEnsa\Referentials\Category;
 use App\Models\EvEnsa\Referentials\EventType;
 use App\Models\EvEnsa\Referentials\Instance;
 use App\Models\EvEnsa\Referentials\Venue;
+use App\Models\EvEnsa\Requests\EventRequest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class EventRequest extends Model
+class Event extends Model
 {
-    protected $table = 'event_requests';
+    protected $table = 'events';
 
     protected $fillable = [
+        'event_request_id',
         'title',
         'instance_id',
         'event_type_id',
@@ -25,18 +26,24 @@ class EventRequest extends Model
         'end_at',
         'expected_attendees',
         'description',
-        'organization_request_file',
         'status',
-        'submitted_at',
-        'review_notes',
+        'is_published',
+        'published_at',
+        'cover_image',
     ];
 
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
-        'submitted_at' => 'datetime',
         'expected_attendees' => 'integer',
+        'is_published' => 'boolean',
+        'published_at' => 'datetime',
     ];
+
+    public function eventRequest(): BelongsTo
+    {
+        return $this->belongsTo(EventRequest::class);
+    }
 
     public function instance(): BelongsTo
     {
@@ -56,15 +63,5 @@ class EventRequest extends Model
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
-    }
-
-    public function documents(): HasMany
-    {
-        return $this->hasMany(EventRequestDocument::class);
-    }
-
-    public function comments(): HasMany
-    {
-        return $this->hasMany(EventRequestComment::class)->latest();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EvEnsa\Requests\EventRequests;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages\CreateEventRequest;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages\EditEventRequest;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages\ListEventRequests;
+use App\Filament\Resources\EvEnsa\Requests\EventRequests\RelationManagers\CommentsRelationManager;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\RelationManagers\DocumentsRelationManager;
 use App\Models\EvEnsa\Referentials\Category;
 use App\Models\EvEnsa\Referentials\EventType;
@@ -154,11 +155,11 @@ class EventRequestResource extends Resource
                 ->helperText('Joindre la demande officielle d’organisation de l’événement.')
                 ->columnSpanFull(),
 
-            Textarea::make('review_notes')
-                ->label('Notes de revue')
-                ->rows(4)
-                ->nullable()
-                ->columnSpanFull(),
+            // Textarea::make('review_notes')
+            //    ->label('Notes de revue')
+            //    ->rows(4)
+            //    ->nullable()
+            //    ->columnSpanFull(),
         ])->columns(2);
     }
 
@@ -316,6 +317,7 @@ class EventRequestResource extends Resource
     {
         return [
             DocumentsRelationManager::class,
+            CommentsRelationManager::class,
         ];
     }
 }

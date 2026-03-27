@@ -2,8 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\EvEnsaRequestStats;
+use App\Filament\Widgets\RecentEventRequests;
 use Filament\Pages\Dashboard as BaseDashboard;
-use Filament\Widgets\AccountWidget;
 
 class Dashboard extends BaseDashboard
 {
@@ -20,7 +21,8 @@ class Dashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
-            AccountWidget::class,
+            EvEnsaRequestStats::class,
+            RecentEventRequests::class,
         ];
     }
 }

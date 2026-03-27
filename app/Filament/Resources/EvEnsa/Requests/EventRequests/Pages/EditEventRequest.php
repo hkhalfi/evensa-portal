@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages;
 
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\EventRequestResource;
+use App\Models\EvEnsa\Requests\EventRequestComment;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
@@ -23,9 +24,53 @@ class EditEventRequest extends EditRecord
                 ->visible(fn (): bool => $this->record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->record->update([
+                    $record = $this->record;
+
+                    if (blank($record->organization_request_file)) {
+                        Notification::make()
+                            ->title('Impossible de soumettre')
+                            ->body('Veuillez joindre la demande d’organisation.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    if ($record->start_at >= $record->end_at) {
+                        Notification::make()
+                            ->title('Dates invalides')
+                            ->body('La date de fin doit être après la date de début.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    if (
+                        blank($record->instance_id) ||
+                        blank($record->event_type_id) ||
+                        blank($record->category_id) ||
+                        blank($record->description)
+                    ) {
+                        Notification::make()
+                            ->title('Dossier incomplet')
+                            ->body('Veuillez remplir tous les champs obligatoires.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    $record->update([
                         'status' => 'submitted',
                         'submitted_at' => now(),
+                    ]);
+
+                    EventRequestComment::create([
+                        'event_request_id' => $record->id,
+                        'user_id' => auth()->id(),
+                        'comment_type' => 'decision_note',
+                        'comment' => 'Demande soumise.',
                     ]);
 
                     Notification::make()
@@ -45,6 +90,13 @@ class EditEventRequest extends EditRecord
                         'status' => 'draft',
                     ]);
 
+                    EventRequestComment::create([
+                        'event_request_id' => $this->record->id,
+                        'user_id' => auth()->id(),
+                        'comment_type' => 'decision_note',
+                        'comment' => 'Demande remise en brouillon.',
+                    ]);
+
                     Notification::make()
                         ->title('La demande a été remise en brouillon')
                         ->success()
@@ -62,6 +114,13 @@ class EditEventRequest extends EditRecord
                         'status' => 'under_review',
                     ]);
 
+                    EventRequestComment::create([
+                        'event_request_id' => $this->record->id,
+                        'user_id' => auth()->id(),
+                        'comment_type' => 'internal_note',
+                        'comment' => 'La demande est passée en cours d’examen.',
+                    ]);
+
                     Notification::make()
                         ->title('La demande est maintenant en cours d’examen')
                         ->success()
@@ -74,7 +133,7 @@ class EditEventRequest extends EditRecord
                 ->color('warning')
                 ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'under_review']))
                 ->form([
-                    Textarea::make('review_notes')
+                    Textarea::make('comment')
                         ->label('Motif / commentaire de révision')
                         ->required()
                         ->rows(4),
@@ -82,7 +141,13 @@ class EditEventRequest extends EditRecord
                 ->action(function (array $data): void {
                     $this->record->update([
                         'status' => 'needs_revision',
-                        'review_notes' => $data['review_notes'],
+                    ]);
+
+                    EventRequestComment::create([
+                        'event_request_id' => $this->record->id,
+                        'user_id' => auth()->id(),
+                        'comment_type' => 'revision_request',
+                        'comment' => $data['comment'],
                     ]);
 
                     Notification::make()
@@ -102,6 +167,13 @@ class EditEventRequest extends EditRecord
                         'status' => 'approved',
                     ]);
 
+                    EventRequestComment::create([
+                        'event_request_id' => $this->record->id,
+                        'user_id' => auth()->id(),
+                        'comment_type' => 'decision_note',
+                        'comment' => 'Demande approuvée.',
+                    ]);
+
                     Notification::make()
                         ->title('La demande a été approuvée')
                         ->success()
@@ -114,7 +186,7 @@ class EditEventRequest extends EditRecord
                 ->color('danger')
                 ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'under_review']))
                 ->form([
-                    Textarea::make('review_notes')
+                    Textarea::make('comment')
                         ->label('Motif du rejet')
                         ->required()
                         ->rows(4),
@@ -122,7 +194,13 @@ class EditEventRequest extends EditRecord
                 ->action(function (array $data): void {
                     $this->record->update([
                         'status' => 'rejected',
-                        'review_notes' => $data['review_notes'],
+                    ]);
+
+                    EventRequestComment::create([
+                        'event_request_id' => $this->record->id,
+                        'user_id' => auth()->id(),
+                        'comment_type' => 'decision_note',
+                        'comment' => $data['comment'],
                     ]);
 
                     Notification::make()
