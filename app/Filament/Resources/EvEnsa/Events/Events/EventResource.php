@@ -16,7 +16,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -114,22 +113,6 @@ class EventResource extends Resource
                 ->numeric()
                 ->nullable(),
 
-            Select::make('status')
-                ->label('Statut')
-                ->options([
-                    'draft' => 'Brouillon',
-                    'scheduled' => 'Planifié',
-                    'published' => 'Publié',
-                    'completed' => 'Terminé',
-                    'archived' => 'Archivé',
-                ])
-                ->default('draft')
-                ->required(),
-
-            Toggle::make('is_published')
-                ->label('Publié')
-                ->default(false),
-
             FileUpload::make('cover_image')
                 ->label('Image de couverture')
                 ->directory('events/covers')
@@ -213,6 +196,11 @@ class EventResource extends Resource
                 IconColumn::make('is_published')
                     ->label('Publié')
                     ->boolean(),
+
+                TextColumn::make('published_at')
+                    ->label('Publié le')
+                    ->dateTime('d/m/Y H:i')
+                    ->toggleable(),
 
                 TextColumn::make('eventRequest.id')
                     ->label('Demande source')
