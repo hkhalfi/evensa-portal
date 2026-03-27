@@ -2,6 +2,7 @@
 
 namespace App\Models\EvEnsa\Requests;
 
+use App\Models\EvEnsa\Events\Event;
 use App\Models\EvEnsa\Referentials\Category;
 use App\Models\EvEnsa\Referentials\EventType;
 use App\Models\EvEnsa\Referentials\Instance;
@@ -9,6 +10,7 @@ use App\Models\EvEnsa\Referentials\Venue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class EventRequest extends Model
 {
@@ -66,5 +68,10 @@ class EventRequest extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(EventRequestComment::class)->latest();
+    }
+
+    public function event(): HasOne
+    {
+        return $this->hasOne(Event::class);
     }
 }

@@ -166,7 +166,7 @@ class EventRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['instance', 'eventType', 'category', 'venue']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['instance', 'eventType', 'category', 'venue', 'event']))
             ->columns([
                 TextColumn::make('title')
                     ->label('Intitulé')
@@ -216,6 +216,12 @@ class EventRequestResource extends Resource
                     ->formatStateUsing(fn (?string $state): string => filled($state) ? 'Attachée' : 'Absente')
                     ->badge()
                     ->color(fn (?string $state): string => filled($state) ? 'success' : 'danger'),
+
+                TextColumn::make('event.id')
+                    ->label('Événement')
+                    ->formatStateUsing(fn ($state) => filled($state) ? 'Créé' : '—')
+                    ->badge()
+                    ->color(fn ($state) => filled($state) ? 'success' : 'gray'),
 
                 TextColumn::make('status')
                     ->label('Statut')

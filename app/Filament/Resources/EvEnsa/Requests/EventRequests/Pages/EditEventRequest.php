@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages;
 
+use App\Filament\Resources\EvEnsa\Events\Events\EventResource;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\EventRequestResource;
+use App\Models\EvEnsa\Events\Event;
 use App\Models\EvEnsa\Requests\EventRequestComment;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -207,6 +209,46 @@ class EditEventRequest extends EditRecord
                         ->title('La demande a été rejetée')
                         ->success()
                         ->send();
+                }),
+
+            Action::make('create_event')
+                ->label('Créer l’événement')
+                ->icon('heroicon-o-calendar-days')
+                ->color('success')
+                ->visible(fn (): bool => $this->record->status === 'approved' && $this->record->event === null)
+                ->requiresConfirmation()
+                ->action(function (): void {
+                    $record = $this->record;
+
+                    $event = Event::create([
+                        'event_request_id' => $record->id,
+                        'title' => $record->title,
+                        'instance_id' => $record->instance_id,
+                        'event_type_id' => $record->event_type_id,
+                        'category_id' => $record->category_id,
+                        'venue_id' => $record->venue_id,
+                        'event_mode' => $record->event_mode,
+                        'start_at' => $record->start_at,
+                        'end_at' => $record->end_at,
+                        'expected_attendees' => $record->expected_attendees,
+                        'description' => $record->description,
+                        'status' => 'draft',
+                        'is_published' => false,
+                    ]);
+
+                    EventRequestComment::create([
+                        'event_request_id' => $record->id,
+                        'user_id' => auth()->id(),
+                        'comment_type' => 'decision_note',
+                        'comment' => 'Événement créé à partir de la demande approuvée.',
+                    ]);
+
+                    Notification::make()
+                        ->title('Événement créé avec succès')
+                        ->success()
+                        ->send();
+
+                    $this->redirect(EventResource::getUrl('edit', ['record' => $event]));
                 }),
 
             DeleteAction::make(),
