@@ -2,8 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\EvEnsaEventStats;
 use App\Filament\Widgets\EvEnsaRequestStats;
 use App\Filament\Widgets\RecentEventRequests;
+use App\Filament\Widgets\UpcomingEvents;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
@@ -22,7 +24,9 @@ class Dashboard extends BaseDashboard
     {
         return [
             EvEnsaRequestStats::class,
+            EvEnsaEventStats::class,
             RecentEventRequests::class,
+            UpcomingEvents::class,
         ];
     }
 }
