@@ -11,6 +11,7 @@ use App\Models\EvEnsa\Referentials\EventType;
 use App\Models\EvEnsa\Referentials\Instance;
 use App\Models\EvEnsa\Referentials\Venue;
 use BackedEnum;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -22,6 +23,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -220,6 +223,54 @@ class EventResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Statut')
+                    ->options([
+                        'draft' => 'Brouillon',
+                        'scheduled' => 'Planifié',
+                        'published' => 'Publié',
+                        'completed' => 'Terminé',
+                        'archived' => 'Archivé',
+                    ]),
+
+                SelectFilter::make('is_published')
+                    ->label('Publication')
+                    ->options([
+                        '1' => 'Publié',
+                        '0' => 'Non publié',
+                    ]),
+
+                SelectFilter::make('instance_id')
+                    ->label('Instance')
+                    ->relationship('instance', 'name'),
+
+                SelectFilter::make('event_type_id')
+                    ->label('Type d’événement')
+                    ->relationship('eventType', 'name'),
+
+                SelectFilter::make('category_id')
+                    ->label('Catégorie')
+                    ->relationship('category', 'name'),
+
+                Filter::make('start_at')
+                    ->label('Période')
+                    ->form([
+                        DatePicker::make('start_from')->label('Début à partir du'),
+                        DatePicker::make('start_until')->label('Début jusqu’au'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['start_from'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('start_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['start_until'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('start_at', '<=', $date),
+                            );
+                    }),
             ])
             ->defaultSort('start_at', 'desc');
     }
