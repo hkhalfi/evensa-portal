@@ -2,15 +2,17 @@
 
 namespace App\Filament\Resources\EvEnsa\Requests\EventRequests\Pages;
 
+use App\Domain\EvEnsa\Actions\CreateEventFromRequestAction;
+use App\Domain\EvEnsa\Workflows\EventRequestWorkflow;
 use App\Filament\Resources\EvEnsa\Events\Events\EventResource;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\EventRequestResource;
-use App\Models\EvEnsa\Events\Event;
 use App\Models\EvEnsa\Requests\EventRequestComment;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Throwable;
 
 class EditEventRequest extends EditRecord
 {
@@ -23,69 +25,37 @@ class EditEventRequest extends EditRecord
                 ->label('Soumettre')
                 ->icon('heroicon-o-paper-airplane')
                 ->color('info')
-                ->visible(fn (): bool => $this->record->status === 'draft')
+                ->visible(fn (): bool => auth()->user()->can('submit', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $record = $this->record;
+                    try {
+                        $workflow = app(EventRequestWorkflow::class);
 
-                    if (blank($record->organization_request_file)) {
+                        $workflow->submit($this->record, auth()->user());
+
                         Notification::make()
-                            ->title('Impossible de soumettre')
-                            ->body('Veuillez joindre la demande d’organisation.')
-                            ->danger()
+                            ->title('Demande soumise avec succès')
+                            ->success()
                             ->send();
 
-                        return;
-                    }
-
-                    if ($record->start_at >= $record->end_at) {
+                        $this->refreshFormData([
+                            'status',
+                            'submitted_at',
+                        ]);
+                    } catch (Throwable $exception) {
                         Notification::make()
-                            ->title('Dates invalides')
-                            ->body('La date de fin doit être après la date de début.')
+                            ->title('Soumission impossible')
+                            ->body($exception->getMessage())
                             ->danger()
                             ->send();
-
-                        return;
                     }
-
-                    if (
-                        blank($record->instance_id) ||
-                        blank($record->event_type_id) ||
-                        blank($record->category_id) ||
-                        blank($record->description)
-                    ) {
-                        Notification::make()
-                            ->title('Dossier incomplet')
-                            ->body('Veuillez remplir tous les champs obligatoires.')
-                            ->danger()
-                            ->send();
-
-                        return;
-                    }
-
-                    $record->update([
-                        'status' => 'submitted',
-                        'submitted_at' => now(),
-                    ]);
-
-                    EventRequestComment::create([
-                        'event_request_id' => $record->id,
-                        'user_id' => auth()->id(),
-                        'comment_type' => 'decision_note',
-                        'comment' => 'Demande soumise.',
-                    ]);
-
-                    Notification::make()
-                        ->title('Demande soumise avec succès')
-                        ->success()
-                        ->send();
                 }),
 
             Action::make('back_to_draft')
                 ->label('Remettre en brouillon')
                 ->icon('heroicon-o-pencil-square')
                 ->color('gray')
-                ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'needs_revision']))
+                ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'needs_revision'], true))
                 ->requiresConfirmation()
                 ->action(function (): void {
                     $this->record->update([
@@ -103,13 +73,17 @@ class EditEventRequest extends EditRecord
                         ->title('La demande a été remise en brouillon')
                         ->success()
                         ->send();
+
+                    $this->refreshFormData([
+                        'status',
+                    ]);
                 }),
 
             Action::make('mark_under_review')
                 ->label('Passer en examen')
                 ->icon('heroicon-o-eye')
                 ->color('warning')
-                ->visible(fn (): bool => in_array($this->record->status, ['submitted']))
+                ->visible(fn (): bool => auth()->user()->can('review', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
                     $this->record->update([
@@ -127,13 +101,17 @@ class EditEventRequest extends EditRecord
                         ->title('La demande est maintenant en cours d’examen')
                         ->success()
                         ->send();
+
+                    $this->refreshFormData([
+                        'status',
+                    ]);
                 }),
 
             Action::make('request_revision')
                 ->label('Demander une révision')
                 ->icon('heroicon-o-arrow-path')
                 ->color('warning')
-                ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'under_review']))
+                ->visible(fn (): bool => auth()->user()->can('requestRevision', $this->record))
                 ->form([
                     Textarea::make('comment')
                         ->label('Motif / commentaire de révision')
@@ -156,37 +134,46 @@ class EditEventRequest extends EditRecord
                         ->title('Révision demandée')
                         ->success()
                         ->send();
+
+                    $this->refreshFormData([
+                        'status',
+                    ]);
                 }),
 
             Action::make('approve')
                 ->label('Approuver')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'under_review']))
+                ->visible(fn (): bool => auth()->user()->can('approve', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->record->update([
-                        'status' => 'approved',
-                    ]);
+                    try {
+                        $workflow = app(EventRequestWorkflow::class);
 
-                    EventRequestComment::create([
-                        'event_request_id' => $this->record->id,
-                        'user_id' => auth()->id(),
-                        'comment_type' => 'decision_note',
-                        'comment' => 'Demande approuvée.',
-                    ]);
+                        $workflow->approve($this->record, auth()->user());
 
-                    Notification::make()
-                        ->title('La demande a été approuvée')
-                        ->success()
-                        ->send();
+                        Notification::make()
+                            ->title('La demande a été approuvée')
+                            ->success()
+                            ->send();
+
+                        $this->refreshFormData([
+                            'status',
+                        ]);
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Approbation impossible')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
 
             Action::make('reject')
                 ->label('Rejeter')
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
-                ->visible(fn (): bool => in_array($this->record->status, ['submitted', 'under_review']))
+                ->visible(fn (): bool => auth()->user()->can('reject', $this->record))
                 ->form([
                     Textarea::make('comment')
                         ->label('Motif du rejet')
@@ -194,62 +181,59 @@ class EditEventRequest extends EditRecord
                         ->rows(4),
                 ])
                 ->action(function (array $data): void {
-                    $this->record->update([
-                        'status' => 'rejected',
-                    ]);
+                    try {
+                        $workflow = app(EventRequestWorkflow::class);
 
-                    EventRequestComment::create([
-                        'event_request_id' => $this->record->id,
-                        'user_id' => auth()->id(),
-                        'comment_type' => 'decision_note',
-                        'comment' => $data['comment'],
-                    ]);
+                        $workflow->reject(
+                            $this->record,
+                            auth()->user(),
+                            $data['comment'] ?? '',
+                        );
 
-                    Notification::make()
-                        ->title('La demande a été rejetée')
-                        ->success()
-                        ->send();
+                        Notification::make()
+                            ->title('La demande a été rejetée')
+                            ->success()
+                            ->send();
+
+                        $this->refreshFormData([
+                            'status',
+                        ]);
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Rejet impossible')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
 
             Action::make('create_event')
                 ->label('Créer l’événement')
                 ->icon('heroicon-o-calendar-days')
                 ->color('success')
-                ->visible(fn (): bool => $this->record->status === 'approved' && $this->record->event === null)
+                ->visible(fn (): bool => auth()->user()->can('createEvent', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $record = $this->record;
+                    try {
+                        $action = app(CreateEventFromRequestAction::class);
 
-                    $event = Event::create([
-                        'event_request_id' => $record->id,
-                        'title' => $record->title,
-                        'instance_id' => $record->instance_id,
-                        'event_type_id' => $record->event_type_id,
-                        'category_id' => $record->category_id,
-                        'venue_id' => $record->venue_id,
-                        'event_mode' => $record->event_mode,
-                        'start_at' => $record->start_at,
-                        'end_at' => $record->end_at,
-                        'expected_attendees' => $record->expected_attendees,
-                        'description' => $record->description,
-                        'status' => 'draft',
-                        'is_published' => false,
-                    ]);
+                        $event = $action->execute($this->record, auth()->user());
 
-                    EventRequestComment::create([
-                        'event_request_id' => $record->id,
-                        'user_id' => auth()->id(),
-                        'comment_type' => 'decision_note',
-                        'comment' => 'Événement créé à partir de la demande approuvée.',
-                    ]);
+                        Notification::make()
+                            ->title('Événement créé avec succès')
+                            ->success()
+                            ->send();
 
-                    Notification::make()
-                        ->title('Événement créé avec succès')
-                        ->success()
-                        ->send();
-
-                    $this->redirect(EventResource::getUrl('edit', ['record' => $event]));
+                        $this->redirect(EventResource::getUrl('edit', ['record' => $event]));
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Création impossible')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
+
             Action::make('view_event')
                 ->label('Voir l’événement')
                 ->icon('heroicon-o-arrow-top-right-on-square')

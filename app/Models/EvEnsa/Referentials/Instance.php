@@ -2,7 +2,9 @@
 
 namespace App\Models\EvEnsa\Referentials;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Instance extends Model
 {
@@ -21,4 +23,9 @@ class Instance extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }

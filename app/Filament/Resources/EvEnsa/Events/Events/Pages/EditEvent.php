@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\EvEnsa\Events\Events\Pages;
 
+use App\Domain\EvEnsa\Workflows\EventWorkflow;
 use App\Filament\Resources\EvEnsa\Events\Events\EventResource;
 use App\Filament\Resources\EvEnsa\Requests\EventRequests\EventRequestResource;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Throwable;
 
 class EditEvent extends EditRecord
 {
@@ -20,133 +22,155 @@ class EditEvent extends EditRecord
                 ->label('Planifier')
                 ->icon('heroicon-o-calendar')
                 ->color('info')
-                ->visible(fn (): bool => in_array($this->record->status, ['draft']))
+                ->visible(fn (): bool => auth()->user()->can('schedule', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->record->update([
-                        'status' => 'scheduled',
-                    ]);
+                    try {
+                        $workflow = app(EventWorkflow::class);
 
-                    Notification::make()
-                        ->title('Événement planifié')
-                        ->success()
-                        ->send();
+                        $workflow->schedule($this->record, auth()->user());
+
+                        Notification::make()
+                            ->title('Événement planifié')
+                            ->success()
+                            ->send();
+
+                        $this->refreshFormData([
+                            'status',
+                        ]);
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Planification impossible')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
 
             Action::make('publish')
                 ->label('Publier')
                 ->icon('heroicon-o-megaphone')
                 ->color('success')
-                ->visible(fn (): bool => in_array($this->record->status, ['draft', 'scheduled']) && ! $this->record->is_published)
+                ->visible(fn (): bool => auth()->user()->can('publish', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $record = $this->record;
+                    try {
+                        $workflow = app(EventWorkflow::class);
 
-                    if (blank($record->title)) {
+                        $workflow->publish($this->record, auth()->user());
+
                         Notification::make()
-                            ->title('Publication impossible')
-                            ->body('Le titre est requis.')
-                            ->danger()
+                            ->title('Événement publié')
+                            ->success()
                             ->send();
 
-                        return;
-                    }
-
-                    if (blank($record->instance_id) || blank($record->event_type_id) || blank($record->category_id)) {
+                        $this->refreshFormData([
+                            'status',
+                            'is_published',
+                            'published_at',
+                        ]);
+                    } catch (Throwable $exception) {
                         Notification::make()
                             ->title('Publication impossible')
-                            ->body('Instance, type et catégorie sont requis.')
+                            ->body($exception->getMessage())
                             ->danger()
                             ->send();
-
-                        return;
                     }
-
-                    if (blank($record->start_at) || blank($record->end_at) || $record->start_at >= $record->end_at) {
-                        Notification::make()
-                            ->title('Publication impossible')
-                            ->body('Les dates de début et fin doivent être valides.')
-                            ->danger()
-                            ->send();
-
-                        return;
-                    }
-
-                    if (blank($record->description)) {
-                        Notification::make()
-                            ->title('Publication impossible')
-                            ->body('La description est requise avant publication.')
-                            ->danger()
-                            ->send();
-
-                        return;
-                    }
-
-                    $record->update([
-                        'status' => 'published',
-                        'is_published' => true,
-                        'published_at' => now(),
-                    ]);
-
-                    Notification::make()
-                        ->title('Événement publié')
-                        ->success()
-                        ->send();
                 }),
 
             Action::make('unpublish')
                 ->label('Dépublier')
                 ->icon('heroicon-o-eye-slash')
                 ->color('warning')
-                ->visible(fn (): bool => $this->record->is_published)
+                ->visible(fn (): bool => auth()->user()->can('unpublish', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->record->update([
-                        'status' => 'scheduled',
-                        'is_published' => false,
-                        'published_at' => null,
-                    ]);
+                    try {
+                        $workflow = app(EventWorkflow::class);
 
-                    Notification::make()
-                        ->title('Événement dépublié')
-                        ->success()
-                        ->send();
+                        $workflow->unpublish($this->record, auth()->user());
+
+                        Notification::make()
+                            ->title('Événement dépublié')
+                            ->success()
+                            ->send();
+
+                        $this->refreshFormData([
+                            'status',
+                            'is_published',
+                            'published_at',
+                        ]);
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Dépublication impossible')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
 
             Action::make('complete')
                 ->label('Marquer comme terminé')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->visible(fn (): bool => in_array($this->record->status, ['scheduled', 'published']))
+                ->visible(fn (): bool => auth()->user()->can('complete', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->record->update([
-                        'status' => 'completed',
-                    ]);
+                    try {
+                        $workflow = app(EventWorkflow::class);
 
-                    Notification::make()
-                        ->title('Événement marqué comme terminé')
-                        ->success()
-                        ->send();
+                        $workflow->complete($this->record, auth()->user());
+
+                        Notification::make()
+                            ->title('Événement marqué comme terminé')
+                            ->success()
+                            ->send();
+
+                        $this->refreshFormData([
+                            'status',
+                            'is_published',
+                            'published_at',
+                        ]);
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Transition impossible')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
 
             Action::make('archive')
                 ->label('Archiver')
                 ->icon('heroicon-o-archive-box')
                 ->color('gray')
-                ->visible(fn (): bool => in_array($this->record->status, ['completed', 'published', 'scheduled']))
+                ->visible(fn (): bool => auth()->user()->can('archive', $this->record))
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->record->update([
-                        'status' => 'archived',
-                        'is_published' => false,
-                    ]);
+                    try {
+                        $workflow = app(EventWorkflow::class);
 
-                    Notification::make()
-                        ->title('Événement archivé')
-                        ->success()
-                        ->send();
+                        $workflow->archive($this->record, auth()->user());
+
+                        Notification::make()
+                            ->title('Événement archivé')
+                            ->success()
+                            ->send();
+
+                        $this->refreshFormData([
+                            'status',
+                            'is_published',
+                            'published_at',
+                        ]);
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Archivage impossible')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
+
             Action::make('view_request')
                 ->label('Voir la demande')
                 ->icon('heroicon-o-arrow-top-right-on-square')

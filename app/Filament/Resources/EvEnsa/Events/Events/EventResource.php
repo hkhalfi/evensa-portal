@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EvEnsa\Events\Events;
 use App\Filament\Resources\EvEnsa\Events\Events\Pages\CreateEvent;
 use App\Filament\Resources\EvEnsa\Events\Events\Pages\EditEvent;
 use App\Filament\Resources\EvEnsa\Events\Events\Pages\ListEvents;
+use App\Filament\Resources\EvEnsa\Events\Events\RelationManagers\EventReportRelationManager;
 use App\Models\EvEnsa\Events\Event;
 use App\Models\EvEnsa\Referentials\Category;
 use App\Models\EvEnsa\Referentials\EventType;
@@ -27,7 +28,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use UnitEnum;
 
 class EventResource extends Resource
@@ -66,10 +66,16 @@ class EventResource extends Resource
             Select::make('instance_id')
                 ->label('Instance organisatrice')
                 ->options(
-                    Instance::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id')
+                    Instance::query()
+                        ->where('is_active', true)
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
                 )
                 ->searchable()
-                ->required(),
+                ->required()
+                ->default(fn () => auth()->user()?->hasRole('instance_manager') ? auth()->user()->instance_id : null)
+                ->disabled(fn () => auth()->user()?->hasRole('instance_manager'))
+                ->dehydrated(),
 
             Select::make('event_type_id')
                 ->label('Type d’événement')
@@ -143,7 +149,17 @@ class EventResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['instance', 'eventType', 'category', 'venue', 'eventRequest']))
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                $query->with([
+                    'instance',
+                    'eventType',
+                    'category',
+                    'venue',
+                    'eventRequest',
+                ]);
+
+                return static::scopeQueryToUser($query);
+            })
             ->columns([
                 TextColumn::make('title')
                     ->label('Intitulé')
@@ -244,7 +260,8 @@ class EventResource extends Resource
 
                 SelectFilter::make('instance_id')
                     ->label('Instance')
-                    ->relationship('instance', 'name'),
+                    ->relationship('instance', 'name')
+                    ->visible(fn (): bool => ! auth()->user()?->hasRole('instance_manager')),
 
                 SelectFilter::make('event_type_id')
                     ->label('Type d’événement')
@@ -284,8 +301,25 @@ class EventResource extends Resource
         ];
     }
 
-    public function event(): HasOne
+    public static function getRelations(): array
     {
-        return $this->hasOne(Event::class);
+        return [
+            EventReportRelationManager::class,
+        ];
+    }
+
+    protected static function scopeQueryToUser(Builder $query): Builder
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->hasRole('instance_manager')) {
+            return $query->where('instance_id', $user->instance_id);
+        }
+
+        return $query;
     }
 }

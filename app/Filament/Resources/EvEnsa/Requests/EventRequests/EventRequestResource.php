@@ -60,10 +60,16 @@ class EventRequestResource extends Resource
             Select::make('instance_id')
                 ->label('Instance organisatrice')
                 ->options(
-                    Instance::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id')
+                    Instance::query()
+                        ->where('is_active', true)
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
                 )
                 ->searchable()
-                ->required(),
+                ->required()
+                ->default(fn () => auth()->user()?->hasRole('instance_manager') ? auth()->user()->instance_id : null)
+                ->disabled(fn () => auth()->user()?->hasRole('instance_manager'))
+                ->dehydrated(),
 
             Select::make('event_type_id')
                 ->label('Type d’événement')
@@ -166,7 +172,11 @@ class EventRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['instance', 'eventType', 'category', 'venue', 'event']))
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                $query->with(['instance', 'eventType', 'category', 'venue', 'event']);
+
+                return static::scopeQueryToUser($query);
+            })
             ->columns([
                 TextColumn::make('title')
                     ->label('Intitulé')
@@ -325,5 +335,20 @@ class EventRequestResource extends Resource
             DocumentsRelationManager::class,
             CommentsRelationManager::class,
         ];
+    }
+
+    protected static function scopeQueryToUser(Builder $query): Builder
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->hasRole('instance_manager')) {
+            return $query->where('instance_id', $user->instance_id);
+        }
+
+        return $query;
     }
 }

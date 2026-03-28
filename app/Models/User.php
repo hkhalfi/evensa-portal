@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\EvEnsa\Referentials\Instance;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
@@ -9,11 +10,13 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasTenants, MustVerifyEmail
 {
@@ -22,6 +25,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    use HasRoles;
     use Notifiable;
 
     /**
@@ -30,6 +34,13 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'instance_id',
     ];
 
     /**
@@ -59,5 +70,10 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class);
+    }
+
+    public function instance(): BelongsTo
+    {
+        return $this->belongsTo(Instance::class);
     }
 }
