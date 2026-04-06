@@ -1,4 +1,3 @@
-cat > README.md <<'EOF'
 # EvEnsa Portal
 
 Plateforme institutionnelle de gestion, validation, planification et valorisation des événements universitaires.
