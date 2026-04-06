@@ -50,11 +50,6 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
         'email_verified_at' => 'datetime',
     ];
 
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true;
-    }
-
     public function canAccessTenant(Model $tenant): bool
     {
         return true;
@@ -75,5 +70,18 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     public function instance(): BelongsTo
     {
         return $this->belongsTo(Instance::class);
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'portal') {
+            return $this->hasRole('instance_manager');
+        }
+
+        if ($panel->getId() === 'admin') {
+            return $this->hasRole('super_admin') || $this->hasRole('commission_member');
+        }
+
+        return false;
     }
 }
