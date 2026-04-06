@@ -22,7 +22,7 @@ class MyInstance extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'Profil';
 
-    protected static ?string $title = 'Profil de l’instance';
+    protected static ?string $title = 'Profil de l\'instance';
 
     protected static BackedEnum | string | null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
