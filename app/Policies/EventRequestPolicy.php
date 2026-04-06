@@ -38,7 +38,7 @@ class EventRequestPolicy
         }
 
         if ($user->hasRole('commission_member')) {
-            return false;
+            return in_array($eventRequest->status, ['submitted', 'under_review', 'needs_revision'], true);
         }
 
         if ($user->hasRole('instance_manager')) {

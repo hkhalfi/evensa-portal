@@ -1,84 +1,97 @@
-<!DOCTYPE html>
-<html lang="fr">
+@extends('layouts.public')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Événements publiés - EvEnsa</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body class="bg-gray-50 text-slate-900">
-    <main class="max-w-6xl mx-auto px-6 py-10">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold">Événements publiés</h1>
-            <p class="text-sm text-slate-600 mt-2">
-                Liste des événements validés et publiés sur EvEnsa.
-            </p>
-        </header>
-
-        @if ($events->isEmpty())
-            <div class="bg-white rounded-xl shadow-sm border p-6">
-                <p class="text-slate-600">Aucun événement publié pour le moment.</p>
+@section('content')
+    <section class="border-b border-slate-200 bg-white py-16 dark:border-slate-800 dark:bg-slate-950">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <div class="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
+                    Événements
+                </div>
+                <h1 class="mt-3 text-4xl font-bold tracking-tight text-slate-950 dark:text-white">
+                    Événements publiés
+                </h1>
+                <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+                    Retrouvez l’ensemble des événements actuellement publiés sur le portail institutionnel EvEnsa.
+                </p>
             </div>
-        @else
-            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                @foreach ($events as $event)
-                    <article class="bg-white rounded-2xl shadow-sm border overflow-hidden">
-                        @if ($event->cover_image)
-                            <img src="{{ asset('storage/' . $event->cover_image) }}" alt="{{ $event->title }}"
-                                class="w-full h-48 object-cover">
-                        @endif
+        </div>
+    </section>
 
-                        <div class="p-5">
-                            <div class="flex flex-wrap gap-2 mb-3">
-                                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                                    {{ $event->eventType?->name }}
-                                </span>
-                                <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-                                    {{ $event->category?->name }}
-                                </span>
+    <section class="bg-slate-50 py-16 dark:bg-slate-900">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            @if ($events->isEmpty())
+                <div
+                    class="rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <h2 class="text-xl font-semibold text-slate-900 dark:text-white">
+                        Aucun événement publié pour le moment
+                    </h2>
+                    <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">
+                        Les événements apparaîtront ici dès leur publication.
+                    </p>
+                </div>
+            @else
+                <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach ($events as $event)
+                        <article
+                            class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+                            <div class="flex items-start justify-between gap-4">
+                                <div>
+                                    <div
+                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
+                                        {{ $event->category?->name ?? 'Événement' }}
+                                    </div>
+                                    <h2 class="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
+                                        <a href="{{ route('events.show', $event) }}" class="hover:text-blue-700">
+                                            {{ $event->title }}
+                                        </a>
+                                    </h2>
+                                </div>
+
+                                @if ($event->eventType)
+                                    <span
+                                        class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                        {{ $event->eventType->name }}
+                                    </span>
+                                @endif
                             </div>
 
-                            <h2 class="text-xl font-semibold mb-2">
-                                <a href="{{ route('public.events.show', $event) }}" class="hover:underline">
-                                    {{ $event->title }}
-                                </a>
-                            </h2>
-
-                            <p class="text-sm text-slate-600 mb-2">
-                                {{ $event->instance?->name }}
-                            </p>
-
-                            <p class="text-sm text-slate-700 mb-3">
-                                {{ $event->start_at?->format('d/m/Y H:i') }}
-                                @if ($event->end_at)
-                                    — {{ $event->end_at->format('d/m/Y H:i') }}
+                            <div class="mt-5 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                                @if ($event->instance)
+                                    <div><span class="font-semibold text-slate-800 dark:text-slate-100">Instance :</span>
+                                        {{ $event->instance->name }}</div>
                                 @endif
-                            </p>
 
-                            @if ($event->venue?->name)
-                                <p class="text-sm text-slate-600 mb-3">
-                                    Lieu : {{ $event->venue->name }}
-                                </p>
-                            @endif
+                                @if ($event->start_at)
+                                    <div><span class="font-semibold text-slate-800 dark:text-slate-100">Date :</span>
+                                        {{ $event->start_at->format('d/m/Y à H:i') }}</div>
+                                @endif
+
+                                @if ($event->venue)
+                                    <div><span class="font-semibold text-slate-800 dark:text-slate-100">Lieu :</span>
+                                        {{ $event->venue->name }}</div>
+                                @endif
+                            </div>
 
                             @if ($event->description)
-                                <p class="text-sm text-slate-700 line-clamp-4 mb-4">
-                                    {{ $event->description }}
+                                <p class="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                                    {{ \Illuminate\Support\Str::limit($event->description, 150) }}
                                 </p>
                             @endif
 
-                            <a href="{{ route('public.events.show', $event) }}"
-                                class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
-                                Voir le détail
-                            </a>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-        @endif
-    </main>
-</body>
+                            <div class="mt-6">
+                                <a href="{{ route('events.show', $event) }}"
+                                    class="inline-flex items-center text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300">
+                                    Consulter les détails
+                                </a>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
 
-</html>
+                <div class="mt-10">
+                    {{ $events->links() }}
+                </div>
+            @endif
+        </div>
+    </section>
+@endsection
