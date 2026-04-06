@@ -24,3 +24,14 @@ frankenphp-worker.php
 
 # macOS
 .DS_Store
+
+# SSH keys
+*.pem
+*.key
+*.pub
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+evensa
+evensa.pub
